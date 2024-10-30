@@ -8,16 +8,16 @@ ExchangeCurrency é um site de câmbio de moedas que permite aos usuários reali
 ## Funcionalidades
 
 1. **Conversão de Moeda**
-   - O usuário pode selecionar duas moedas e inserir um valor na moeda de origem. O sistema exibirá:
+   O usuário pode selecionar duas moedas e inserir um valor na moeda de origem. O sistema exibirá:
       - Valor unitário convertido entre as duas moedas.
       - Valor total convertido do montante inserido na moeda de destino.
 
 2. **Histórico Pessoal**
-   - Armazena localmente (no navegador) um histórico das últimas 5 conversões realizadas. As informações salvas incluem:
+   Armazena localmente (no navegador) um histórico das últimas 5 conversões realizadas. As informações salvas incluem:
       - Moedas de origem e destino.
       - Valor convertido.
       - Data da conversão.
-   - O histórico é acessível sem cadastro e sem necessidade de login.
+    O histórico é acessível sem cadastro e sem necessidade de login.
 
 3. **Gráfico de Variação Cambial**
    - Permite ao usuário visualizar um gráfico de linhas com a variação do valor de uma moeda específica ao longo dos últimos meses.
