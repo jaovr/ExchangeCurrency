@@ -17,7 +17,7 @@ ExchangeCurrency é um site de câmbio de moedas que permite aos usuários reali
       - Moedas de origem e destino.
       - Valor convertido.
       - Data da conversão.
-    O histórico é acessível sem cadastro e sem necessidade de login.
+      - O histórico é acessível sem cadastro e sem necessidade de login.
 
 3. **Gráfico de Variação Cambial**
    - Permite ao usuário visualizar um gráfico de linhas com a variação do valor de uma moeda específica ao longo dos últimos meses.
