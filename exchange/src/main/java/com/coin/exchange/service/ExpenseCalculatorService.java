@@ -16,7 +16,7 @@ public class ExpenseCalculatorService {
     private static final String API_KEY = "47ec8325dfb87944f14d75fa";
     private static final String API_URL = "https://v6.exchangerate-api.com/v6/" + API_KEY + "/pair/";
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     @Autowired
     public ExpenseCalculatorService(RestTemplate restTemplate) {
@@ -34,7 +34,7 @@ public class ExpenseCalculatorService {
             JsonNode response = restTemplate.getForObject(url, JsonNode.class);
 
             if (response == null || response.get("conversion_result") == null) {
-                throw new RuntimeException("Resultado de conversão não encontrado para as moedas fornecidas.");
+                throw new RuntimeException("Conversion has not worked successfully");
             }
 
             double convertedAmount = response.get("conversion_result").asDouble();

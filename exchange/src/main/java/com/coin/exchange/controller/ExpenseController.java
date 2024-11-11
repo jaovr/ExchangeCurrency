@@ -19,9 +19,6 @@ public class ExpenseController {
     public JsonNode calculateTotal(@RequestBody List<Expense> expenses,
                                    @RequestParam String targetCurrency,
                                    @RequestParam Double tax) {
-        System.out.println("Recebendo despesas: " + expenses);
-        System.out.println("Target Currency: " + targetCurrency);
-        System.out.println("Tax: " + tax);
 
         return expenseCalculatorService.calculateTotalExpensesInCurrency(expenses, targetCurrency, tax);
     }
