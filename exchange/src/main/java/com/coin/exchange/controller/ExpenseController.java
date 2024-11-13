@@ -12,8 +12,11 @@ import java.util.List;
 @RequestMapping("/api/expenses")
 public class ExpenseController {
 
-    @Autowired
-    private ExpenseCalculatorService expenseCalculatorService;
+    private final ExpenseCalculatorService expenseCalculatorService;
+
+    public ExpenseController(ExpenseCalculatorService expenseCalculatorService) {
+        this.expenseCalculatorService = expenseCalculatorService;
+    }
 
     @PostMapping("/calculateTotal")
     public JsonNode calculateTotal(@RequestBody List<Expense> expenses,
