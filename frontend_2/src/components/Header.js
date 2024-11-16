@@ -1,11 +1,12 @@
 import React from 'react';
+import HamburgerMenu from './HamburguerMenu'; // Certifique-se de que o caminho esteja correto
 
 function Header() {
-  return (         //texto do header (n lembro se o nome era esse msm)
-    <header style={headerStyle}>
-      	<h1>ExchangeCurrency</h1>
-	<HamburgerMenu />
-    </header>
+  return (
+      <header style={headerStyle}>
+        <h1>ExchangeCurrency</h1>
+        <HamburgerMenu />
+      </header>
   );
 }
 
