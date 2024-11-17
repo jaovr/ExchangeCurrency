@@ -1,12 +1,12 @@
 import React from 'react';
-import HamburgerMenu from './HamburguerMenu'; // Certifique-se de que o caminho esteja correto
+import HamburgerMenu from './HamburguerMenu';
 
-function Header() {
+function Header({ setPage }) {
   return (
-      <header style={headerStyle}>
-        <h1>ExchangeCurrency</h1>
-        <HamburgerMenu />
-      </header>
+    <header style={headerStyle}>
+      <h1>Exchange</h1>
+      <HamburgerMenu setPage={setPage} />
+    </header>
   );
 }
 

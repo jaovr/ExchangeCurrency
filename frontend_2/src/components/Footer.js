@@ -3,7 +3,7 @@ import React from 'react';
 function Footer() {
   return (
     <footer style={footerStyle}>
-      <p>&copy; 2024 Exchange. Todos os direitos reservados.</p> // só pra fazer graça msm
+      <p>&copy; 2024 Exchange. Todos os direitos reservados.</p>
     </footer>
   );
 }
