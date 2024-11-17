@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function Calculator() {
-    const [expenses, setExpenses] = useState([{ category: '', amount: '', currency: 'USD' }]);
+    const savedExpenses = JSON.parse(localStorage.getItem('expenses')) || [{ category: '', amount: 0, currency: 'USD' }];
+    const savedToCurrency = localStorage.getItem('toCurrency') || 'EUR';
+    const savedTaxRate = parseFloat(localStorage.getItem('taxRate')) || 0;
+
+    const [expenses, setExpenses] = useState(savedExpenses);
     const [totalExpense, setTotalExpense] = useState(null);
     const [convertedTotal, setConvertedTotal] = useState(null);
-    const [fromCurrency, setFromCurrency] = useState('USD');
-    const [toCurrency, setToCurrency] = useState('EUR');
-    const [taxRate, setTaxRate] = useState(0);
+    const [toCurrency, setToCurrency] = useState(savedToCurrency);
+    const [taxRate, setTaxRate] = useState(savedTaxRate);
     const [errorMessage, setErrorMessage] = useState('');
+
+    useEffect(() => {
+        localStorage.setItem('expenses', JSON.stringify(expenses));
+    }, [expenses]);
+
+    useEffect(() => {
+        localStorage.setItem('toCurrency', toCurrency);
+    }, [toCurrency]);
+
+    useEffect(() => {
+        localStorage.setItem('taxRate', taxRate.toString());
+    }, [taxRate]);
 
     const handleExpenseChange = (index, field, value) => {
         const newExpenses = [...expenses];
@@ -16,7 +32,11 @@ function Calculator() {
     };
 
     const addExpense = () => {
-        setExpenses([...expenses, { category: '', amount: '', currency: 'USD' }]);
+        setExpenses([...expenses, { category: '', amount: 0, currency: 'USD' }]);
+    };
+
+    const removeExpense = (index) => {
+        setExpenses(expenses.filter((_, i) => i !== index));
     };
 
     const calculateTotal = async () => {
@@ -26,21 +46,14 @@ function Calculator() {
                 tax: taxRate
             });
 
-            const response = await fetch(`/api/expenses/calculateTotal?${queryParams}`, {
-                method: 'POST',
+            const response = await axios.post(`/api/expenses/calculateTotal?${queryParams.toString()}`, expenses, {
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(expenses),
+                }
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            setTotalExpense(data.total_converted_amount);
-            setConvertedTotal(data.final_total_with_tax);
+            setTotalExpense(response.data.total_converted_amount.toFixed(2));
+            setConvertedTotal(response.data.final_total_with_tax.toFixed(2));
         } catch (error) {
             console.error('Erro ao calcular o total das despesas:', error);
             setErrorMessage('Erro ao calcular o total das despesas. Tente novamente mais tarde.');
@@ -54,66 +67,67 @@ function Calculator() {
     };
 
     return (
-        <div style={calculatorStyle}>
-            <h2 style={titleStyle}>Calculadora de Viagem</h2>
-            <p style={descriptionStyle}>Use nossa calculadora para calcular os custos de sua viagem.</p>
-            <div style={expensesContainerStyle}>
+        <div style={styles.calculatorContainer}>
+            <h2 style={styles.title}>Calculadora de Viagem</h2>
+            <p style={styles.description}>Use nossa calculadora para calcular os custos de sua viagem.</p>
+            <div style={styles.expensesContainer}>
                 {expenses.map((expense, index) => (
-                    <div key={index} style={inputGroupStyle}>
+                    <div key={index} style={styles.inputGroup}>
                         <input
                             type="text"
                             placeholder="Categoria"
                             value={expense.category}
                             onChange={(e) => handleExpenseChange(index, 'category', e.target.value)}
-                            style={inputStyle}
+                            style={styles.input}
                         />
                         <input
                             type="number"
                             placeholder="Quantia"
                             value={expense.amount}
-                            onChange={(e) => handleExpenseChange(index, 'amount', e.target.value)}
-                            style={inputStyle}
+                            onChange={(e) => handleExpenseChange(index, 'amount', parseFloat(e.target.value))}
+                            style={styles.input}
                         />
-                        <div style={inputAndFlagStyle}>
-                            <img src={getFlagUrl(expense.currency)} alt="" style={flagStyle} />
+                        <div style={styles.inputAndFlag}>
+                            <img src={getFlagUrl(expense.currency)} alt="" style={styles.flag} />
                             <input
                                 type="text"
                                 placeholder="Moeda"
                                 value={expense.currency}
                                 onChange={(e) => handleExpenseChange(index, 'currency', e.target.value.toUpperCase())}
-                                style={inputStyle}
+                                style={styles.input}
                             />
                         </div>
+                        <button onClick={() => removeExpense(index)} style={styles.removeButton}>Remover</button>
                     </div>
                 ))}
-                <button onClick={addExpense} style={buttonStyle}>Adicionar Despesa</button>
+                <button onClick={addExpense} style={styles.button}>Adicionar Despesa</button>
             </div>
-            <div style={currencyContainerStyle}>
+            <div style={styles.currencyContainer}>
                 <label>Moeda de Destino:</label>
-                <div style={inputAndFlagStyle}>
-                    <img src={getFlagUrl(toCurrency)} alt="" style={flagStyle} />
+                <div style={styles.inputAndFlag}>
+                    <img src={getFlagUrl(toCurrency)} alt="" style={styles.flag} />
                     <input
                         type="text"
                         value={toCurrency}
                         onChange={(e) => setToCurrency(e.target.value.toUpperCase())}
-                        style={inputStyle}
+                        style={styles.input}
                     />
                 </div>
             </div>
-            <div style={currencyContainerStyle}>
+            <div style={styles.currencyContainer}>
                 <label>Taxa (%) :</label>
                 <input
                     type="number"
                     value={taxRate}
-                    onChange={(e) => setTaxRate(e.target.value)}
-                    style={inputStyle}
+                    onChange={(e) => setTaxRate(parseFloat(e.target.value))}
+                    style={styles.input}
                 />
             </div>
-            <button onClick={calculateTotal} style={buttonStyle}>Calcular Total</button>
-            {errorMessage && <p style={errorStyle}>{errorMessage}</p>}
+            <button onClick={calculateTotal} style={styles.button}>Calcular Total</button>
+            {errorMessage && <p style={styles.error}>{errorMessage}</p>}
             {totalExpense !== null && (
-                <div style={resultStyle}>
-                    <h3 style={resultTitleStyle}>Total das Despesas</h3>
+                <div style={styles.result}>
+                    <h3 style={styles.resultTitle}>Total das Despesas</h3>
                     <p>Total (sem taxas): <strong>{totalExpense} {toCurrency}</strong></p>
                     {convertedTotal !== null && <p>Total com Taxa: <strong>{convertedTotal} {toCurrency}</strong></p>}
                 </div>
@@ -122,91 +136,88 @@ function Calculator() {
     );
 }
 
-const calculatorStyle = {
-    maxWidth: '600px',
-    margin: '0 auto',
-    textAlign: 'center',
-    padding: '2em',
-    fontFamily: '\'Roboto\', sans-serif',
-    color: '#333',
-    backgroundColor: '#fdfdfd',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-};
-
-const titleStyle = {
-    fontSize: '1.5em',
-    marginBottom: '0.5em',
-};
-
-const descriptionStyle = {
-    fontSize: '1em',
-    marginBottom: '1.5em',
-    color: '#555',
-};
-
-const expensesContainerStyle = {
-    marginBottom: '1.5em',
-};
-
-const inputGroupStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    width: '100%',
-    marginBottom: '1em',
-};
-
-const inputStyle = {
-    width: 'calc(100% - 40px)',
-    padding: '0.5em',
-    fontSize: '1em',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-};
-
-const inputAndFlagStyle = {
-    display: 'flex',
-    alignItems: 'center',
-};
-
-const flagStyle = {
-    width: '30px',
-    height: '20px',
-    marginRight: '10px',
-};
-
-const buttonStyle = {
-    padding: '0.75em 1.5em',
-    fontSize: '1em',
-    color: '#fff',
-    backgroundColor: '#4CAF50',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-};
-
-const currencyContainerStyle = {
-    marginBottom: '1em',
-};
-
-const resultStyle = {
-    marginTop: '2em',
-    textAlign: 'left',
-    backgroundColor: '#f5f5f5',
-    padding: '1.5em',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-};
-
-const resultTitleStyle = {
-    fontSize: '1.2em',
-    marginBottom: '0.5em',
-};
-
-const errorStyle = {
-    color: 'red',
-    marginTop: '1em',
+const styles = {
+    calculatorContainer: {
+        maxWidth: '600px',
+        margin: 'auto',
+        padding: '20px',
+        border: '1px solid #ccc',
+        borderRadius: '10px',
+        backgroundColor: '#f9f9f9',
+        boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+    },
+    title: {
+        textAlign: 'center',
+        fontSize: '24px',
+        marginBottom: '10px',
+    },
+    description: {
+        textAlign: 'center',
+        fontSize: '16px',
+        marginBottom: '20px',
+    },
+    expensesContainer: {
+        marginBottom: '20px',
+    },
+    inputGroup: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '10px',
+        gap: '10px', // Adiciona espaçamento entre os campos individuais
+    },
+    input: {
+        width: '30%',
+        padding: '10px',
+        border: '1px solid #ccc',
+        borderRadius: '5px',
+    },
+    inputAndFlag: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',  // Adiciona espaçamento entre a bandeira e o campo de entrada
+    },
+    flag: {
+        width: '24px',
+        height: '24px',
+    },
+    currencyContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: '20px',
+        gap: '10px', // Adiciona espaçamento entre bandeiras e campos na seção de Moeda de Destino
+    },
+    result: {
+        textAlign: 'center',
+        marginTop: '20px',
+    },
+    resultTitle: {
+        fontSize: '18px',
+        marginBottom: '10px',
+    },
+    error: {
+        color: 'red',
+        marginTop: '10px',
+        textAlign: 'center',
+    },
+    button: {
+        display: 'block',
+        width: '100%',
+        padding: '10px',
+        border: 'none',
+        borderRadius: '5px',
+        backgroundColor: '#007bff',
+        color: 'white',
+        fontSize: '16px',
+        cursor: 'pointer',
+    },
+    removeButton: {
+        backgroundColor: '#dc3545',
+        color: 'white',
+        border: 'none',
+        padding: '10px',
+        borderRadius: '5px',
+        cursor: 'pointer',
+    },
 };
 
 export default Calculator;
