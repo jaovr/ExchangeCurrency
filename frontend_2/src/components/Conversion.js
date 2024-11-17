@@ -7,7 +7,7 @@ function Conversion() {
     const [amount, setAmount] = useState('');
     const [conversionResult, setConversionResult] = useState(null);
     const [conversionRate, setConversionRate] = useState(null);
-    const [historicalRates, setHistoricalRates] = useState([]);
+
     const [errorMessage, setErrorMessage] = useState('');
 
     const handleConversion = async () => {
@@ -32,30 +32,11 @@ function Conversion() {
         }
     };
 
-    const fetchHistoricalRates = async (fromCurrency, toCurrency) => {
-        if (fromCurrency && toCurrency) {
-            setErrorMessage('');
-            try {
-                const response = await fetch(`/api/conversion/historical/${fromCurrency}/${toCurrency}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                setHistoricalRates(data.rates);
-            } catch (error) {
-                console.error('Erro ao buscar as taxas históricas:', error);
-                setErrorMessage(`Erro ao buscar as taxas históricas: ${error.message}`);
-            }
-        } else {
-            setErrorMessage('Códigos de moeda inválidos. Por favor, verifique e tente novamente.');
-        }
-    };
 
-    useEffect(() => {
-        if (fromCurrency && toCurrency) {
-            fetchHistoricalRates(fromCurrency, toCurrency);
-        }
-    }, [fromCurrency, toCurrency]);
+
+
+
+
 
     const getFlagUrl = (currencyCode) => {
         if (!currencyCode) return '';
@@ -63,36 +44,11 @@ function Conversion() {
         return `https://flagpedia.net/data/flags/h80/${countryCode}.png`;
     };
 
-    const data = {
-        labels: historicalRates.map(rate => rate.date),
-        datasets: [
-            {
-                label: `Taxa de câmbio ${fromCurrency}/${toCurrency}`,
-                data: historicalRates.map(rate => rate.value),
-                fill: false,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-            },
-        ],
-    };
 
-    const options = {
-        scales: {
-            x: {
-                type: 'time',
-                time: {
-                    unit: 'day',
-                    tooltipFormat: 'll',
-                    displayFormats: {
-                        day: 'MMM DD',
-                    },
-                },
-            },
-            y: {
-                beginAtZero: false,
-            },
-        },
-    };
+
+
+
+
 
     return (
         <div style={conversionStyle}>
@@ -142,12 +98,8 @@ function Conversion() {
                     <p>Resultado da Conversão: <strong>{conversionResult}</strong></p>
                 </div>
             )}
-            {historicalRates.length > 0 && (
-                <div style={chartContainerStyle}>
-                    <h3 style={resultTitleStyle}>Variação Cambial</h3>
-                    <Line data={data} options={options} />
-                </div>
-            )}
+
+
         </div>
     );
 }
