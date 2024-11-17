@@ -18,24 +18,23 @@ public class ConversionCurrencyService {
         this.restTemplate = restTemplate;
     }
 
-        public JsonNode getExchangeRate(String fromCurrency, String toCurrency) {
-            String url = API_URL + fromCurrency + "/" + toCurrency;
-            JsonNode response = restTemplate.getForObject(url, JsonNode.class);
-            if (response == null || response.get("conversion_rate") == null) {
-                throw new RuntimeException("Conversion rate not found for the provided currencies.");
-            }
-            return response.get("conversion_rate");
+    public JsonNode getExchangeRate(String fromCurrency, String toCurrency) {
+        String url = API_URL + fromCurrency + "/" + toCurrency;
+        JsonNode response = restTemplate.getForObject(url, JsonNode.class);
+        if (response == null || response.get("conversion_rate") == null) {
+            throw new RuntimeException("Conversion rate not found for the provided currencies.");
         }
-
-
-        public JsonNode getExchangePair(String fromCurrency, String toCurrency, String amount) {
-            String url = API_URL + fromCurrency + "/" + toCurrency + "/" + amount;
-            JsonNode response = restTemplate.getForObject(url, JsonNode.class);
-            if (response == null || response.get("conversion_result") == null) {
-                throw new RuntimeException("Conversion result not found for the provided pair currencies.");
-            }
-            return response.get("conversion_result");
-        }
+        // Return the entire response JSON node
+        return response;
     }
 
-
+    public JsonNode getExchangePair(String fromCurrency, String toCurrency, String amount) {
+        String url = API_URL + fromCurrency + "/" + toCurrency + "/" + amount;
+        JsonNode response = restTemplate.getForObject(url, JsonNode.class);
+        if (response == null || response.get("conversion_result") == null) {
+            throw new RuntimeException("Conversion result not found for the provided pair currencies.");
+        }
+        // Return the entire response JSON node
+        return response;
+    }
+}

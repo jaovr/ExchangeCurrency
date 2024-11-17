@@ -18,7 +18,7 @@ public class ConversionController {
     public JsonNode getConversionRate(
             @PathVariable String fromCurrency,
             @PathVariable String toCurrency
-            ) {
+    ) {
         return conversionCurrencyService.getExchangeRate(fromCurrency, toCurrency);
     }
 
@@ -27,7 +27,7 @@ public class ConversionController {
             @PathVariable String fromCurrency,
             @PathVariable String toCurrency,
             @PathVariable String amount
-            ) {
+    ) {
         return conversionCurrencyService.getExchangePair(fromCurrency, toCurrency, amount);
     }
 }
