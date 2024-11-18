@@ -6,7 +6,6 @@ function Conversion() {
     const [amount, setAmount] = useState('');
     const [conversionResult, setConversionResult] = useState(null);
     const [conversionRate, setConversionRate] = useState(null);
-    const [tradingViewUrl, setTradingViewUrl] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [symbolTv, setSymbolTv] = useState('');
     const [conversionHistory, setConversionHistory] = useState([]);
@@ -34,7 +33,6 @@ function Conversion() {
                     timestamp: new Date().toLocaleString()
                 };
 
-                // Save the new conversion in localStorage
                 const updatedHistory = [...conversionHistory, newConversion];
                 setConversionHistory(updatedHistory);
                 localStorage.setItem('conversionHistory', JSON.stringify(updatedHistory));
@@ -48,31 +46,23 @@ function Conversion() {
         }
     };
 
-    useEffect(() => {
-        if (fromCurrency && toCurrency) {
-            const symbol = `${fromCurrency}/${toCurrency}`;
-            const symbolTv = `FX:${symbol}`;
-            setSymbolTv(symbolTv);
-            console.log("TradingView Symbol:", symbolTv);
+    const validCurrencyCode = (code) => code && typeof code === 'string' && code.trim().length === 3;
 
-            const widgetUrl = `https://s3.tradingview.com/embed-widget/advanced-chart/?locale=en#${encodeURIComponent(JSON.stringify({
-                theme: "light",
-                style: 1,
-                timezone: "Etc/UTC",
-                symbol: symbolTv,
-                interval: "D",
-                hide_side_toolbar: false,
-                allow_symbol_change: true,
-                save_image: false
-            }))}`;
-            setTradingViewUrl(widgetUrl);
+    const updateSymbolTv = (from, to) => {
+        if (validCurrencyCode(from) && validCurrencyCode(to) && from !== to) {
+            const symbol = `${from.trim().toUpperCase()}${to.trim().toUpperCase()}`;
+            setSymbolTv(symbol);
         } else {
-            setTradingViewUrl('');
+            setSymbolTv('');
         }
+    };
+
+    // Update symbolTv whenever fromCurrency or toCurrency changes
+    useEffect(() => {
+        updateSymbolTv(fromCurrency, toCurrency);
     }, [fromCurrency, toCurrency]);
 
     useEffect(() => {
-        // Load conversion history from localStorage on component mount
         const history = localStorage.getItem('conversionHistory');
         if (history) {
             setConversionHistory(JSON.parse(history));
@@ -85,65 +75,92 @@ function Conversion() {
         return `https://flagpedia.net/data/flags/h80/${countryCode}.png`;
     };
 
+    const handleFromCurrencyChange = (e) => {
+        const value = e.target.value.toUpperCase();
+        if (value.length <= 3) {
+            setFromCurrency(value);
+        }
+    };
+
+    const handleToCurrencyChange = (e) => {
+        const value = e.target.value.toUpperCase();
+        if (value.length <= 3) {
+            setToCurrency(value);
+        }
+    };
+
+    const tradingViewUrl = (symbol) => {
+        return `https://s.tradingview.com/widgetembed/?hideideas=1&locale=en#%7B%22symbol%22%3A%22${symbol}%22%2C%22interval%22%3A%221%22%2C%22hide_side_toolbar%22%3A%220%22%2C%22allow_symbol_change%22%3A%221%22%2C%22theme%22%3A%22light%22%2C%22style%22%3A%221%22%2C%22timezone%22%3A%22UTC%22%2C%22withdateranges%22%3A%221%22%7D`;
+    };
+
     return (
-        <div style={conversionStyle}>
+        <div style={mainContainerStyle}>
             <h2 style={titleStyle}>Conversão de Moedas</h2>
             <p style={descriptionStyle}>Aqui você pode converter as moedas que desejar</p>
-            <div style={formContainerStyle}>
-                <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Moeda de origem:</label>
-                    <div style={inputAndFlagStyle}>
-                        <img src={getFlagUrl(fromCurrency)} alt="" style={flagStyle} />
-                        <input
-                            type="text"
-                            value={fromCurrency}
-                            onChange={(e) => setFromCurrency(e.target.value.toUpperCase())}
-                            style={inputStyle}
-                        />
+            <div style={contentContainerStyle}>
+                <div style={leftContainerStyle}>
+                    <div style={formContainerStyle}>
+                        <div style={inputGroupStyle}>
+                            <label style={labelStyle}>Moeda de origem:</label>
+                            <div style={inputAndFlagStyle}>
+                                <img src={getFlagUrl(fromCurrency)} alt="" style={flagStyle} />
+                                <input
+                                    type="text"
+                                    value={fromCurrency}
+                                    onChange={handleFromCurrencyChange}
+                                    style={inputStyle}
+                                />
+                            </div>
+                        </div>
+                        <div style={inputGroupStyle}>
+                            <label style={labelStyle}>Moeda de destino:</label>
+                            <div style={inputAndFlagStyle}>
+                                <img src={getFlagUrl(toCurrency)} alt="" style={flagStyle} />
+                                <input
+                                    type="text"
+                                    value={toCurrency}
+                                    onChange={handleToCurrencyChange}
+                                    style={inputStyle}
+                                />
+                            </div>
+                        </div>
+                        <div style={inputGroupStyle}>
+                            <label style={labelStyle}>Quantia:</label>
+                            <input
+                                type="number"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                style={inputStyle}
+                            />
+                        </div>
+                        <button onClick={handleConversion} style={buttonStyle}>Converter</button>
                     </div>
+                    {errorMessage && <p style={errorStyle}>{errorMessage}</p>}
+                    {conversionResult !== null && (
+                        <div style={resultStyle}>
+                            <h3 style={resultTitleStyle}>Resultado da Conversão</h3>
+                            <p>Taxa de Conversão: <strong>{conversionRate}</strong></p>
+                            <p>Resultado da Conversão: <strong>{conversionResult}</strong></p>
+                        </div>
+                    )}
                 </div>
-                <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Moeda de destino:</label>
-                    <div style={inputAndFlagStyle}>
-                        <img src={getFlagUrl(toCurrency)} alt="" style={flagStyle} />
-                        <input
-                            type="text"
-                            value={toCurrency}
-                            onChange={(e) => setToCurrency(e.target.value.toUpperCase())}
-                            style={inputStyle}
-                        />
+                {symbolTv && (
+                    <div style={rightContainerStyle}>
+                        <div style={chartContainerStyle}>
+                            <h3 style={resultTitleStyle}>Gráfico de Câmbio</h3>
+                            <iframe
+                                src={tradingViewUrl(symbolTv)}
+                                width="100%"
+                                height="400"
+                                frameBorder="0"
+                                allowtransparency="true"
+                                scrolling="no"
+                                allowFullScreen>
+                            </iframe>
+                        </div>
                     </div>
-                </div>
-                <div style={inputGroupStyle}>
-                    <label style={labelStyle}>Quantia:</label>
-                    <input
-                        type="number"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        style={inputStyle}
-                    />
-                </div>
-                <button onClick={handleConversion} style={buttonStyle}>Converter</button>
+                )}
             </div>
-            {errorMessage && <p style={errorStyle}>{errorMessage}</p>}
-            {conversionResult !== null && (
-                <div style={resultStyle}>
-                    <h3 style={resultTitleStyle}>Resultado da Conversão</h3>
-                    <p>Taxa de Conversão: <strong>{conversionRate}</strong></p>
-                    <p>Resultado da Conversão: <strong>{conversionResult}</strong></p>
-                </div>
-            )}
-            {tradingViewUrl && (
-                <div style={chartContainerStyle}>
-                    <h3 style={resultTitleStyle}>Gráfico de Câmbio</h3>
-                    <iframe
-                        src={tradingViewUrl}
-                        style={{ width: '100%', height: '400px', border: 'none' }}
-                        allowtransparency="true"
-                        frameBorder="0"
-                    ></iframe>
-                </div>
-            )}
             {conversionHistory.length > 0 && (
                 <div style={historyContainerStyle}>
                     <h3 style={resultTitleStyle}>Histórico de Conversões</h3>
@@ -163,10 +180,9 @@ function Conversion() {
     );
 }
 
-const conversionStyle = {
-    maxWidth: '600px',
+const mainContainerStyle = {
+    maxWidth: '1200px',
     margin: '0 auto',
-    textAlign: 'center',
     padding: '2em',
     fontFamily: '\'Roboto\', sans-serif',
     color: '#333',
@@ -175,12 +191,31 @@ const conversionStyle = {
 const titleStyle = {
     fontSize: '1.5em',
     marginBottom: '0.5em',
+    textAlign: 'center',
 };
 
 const descriptionStyle = {
     fontSize: '1em',
     marginBottom: '1.5em',
     color: '#555',
+    textAlign: 'center',
+};
+
+const contentContainerStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '2em',
+};
+
+const leftContainerStyle = {
+    flex: '1',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+};
+
+const rightContainerStyle = {
+    flex: '1',
 };
 
 const formContainerStyle = {
@@ -188,6 +223,7 @@ const formContainerStyle = {
     flexDirection: 'column',
     alignItems: 'center',
     gap: '1em',
+    width: '100%',
 };
 
 const inputGroupStyle = {
@@ -247,7 +283,6 @@ const resultTitleStyle = {
 };
 
 const chartContainerStyle = {
-    marginTop: '2em',
     textAlign: 'left',
     backgroundColor: '#f5f5f5',
     padding: '1.5em',

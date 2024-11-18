@@ -1,7 +1,7 @@
 import React from 'react';
 
-function Content() {		//da pra colocar aqui as funções relvantes do meio da página
-  return (                  //texto frufru
+function Content() {
+  return (
     <main style={contentStyle}>
       <p>Bem-vindo à ExchangeRate!</p> 
     </main>
