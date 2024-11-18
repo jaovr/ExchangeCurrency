@@ -1,9 +1,17 @@
 import React from 'react';
 
-function Content() {
-  return (
+function Content() {		//da pra colocar aqui as funções relvantes do meio da página
+  return (                  //texto frufru
     <main style={contentStyle}>
-      <p>Bem-vindo à ExchangeRate!</p> 
+      <h2>Bem-vindo à ExchangeRate!</h2>
+      <p></p>
+      <h3>Nossos Destaques</h3>
+      <ul>
+          <li>Conversão de moedas em tempo real</li>
+          <li>Calculadora financeira</li>
+          <li>Gráficos</li>
+          <li>Simples, rápido e gratuito</li>
+        </ul>
     </main>
   );
 }
